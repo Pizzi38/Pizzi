@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+<title>iPoint Carcarañá — Cotizador</title>
+
+<meta name="description" content="Cotizador de financiación propia y con tarjeta para iPoint Carcarañá" />
+<meta name="theme-color" content="#0b0f14" />
+
+<!-- PWA / iOS -->
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<link rel="apple-touch-icon" sizes="152x152" href="icons/apple-touch-icon-152.png" />
+<link rel="apple-touch-icon" sizes="167x167" href="icons/apple-touch-icon-167.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="iPoint" />
+<meta name="mobile-web-app-capable" content="yes" />
+
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="app-header">
+    <div class="app-header__title">
+      <span class="app-header__logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="20" height="20"><rect x="1" y="14" width="3.6" height="8" rx="1.4"/><rect x="7" y="10" width="3.6" height="12" rx="1.4"/><rect x="13" y="5.5" width="3.6" height="16.5" rx="1.4"/><rect x="19" y="1.5" width="3.6" height="20.5" rx="1.4"/></svg>
+      </span>
+      <span id="business-name-label">iPoint Carcarañá</span>
+    </div>
+    <button id="quote-shortcut" class="app-header__quote-btn" type="button" hidden>
+      <span id="quote-shortcut-count">0</span>
+    </button>
+  </header>
+
+  <!-- ===================== VISTAS ===================== -->
+  <main class="views">
+
+    <!-- ---------- INICIO ---------- -->
+    <section id="view-home" class="view">
+      <div class="hero-card">
+        <p class="hero-card__eyebrow">Cotizador rápido</p>
+        <h1 class="hero-card__title">¿Qué querés hacer?</h1>
+      </div>
+
+      <div class="action-grid">
+        <button class="action-card" data-nav="quote">
+          <span class="action-card__icon" aria-hidden="true">🧮</span>
+          <span class="action-card__label">Nueva cotización</span>
+          <span class="action-card__sub" id="home-quote-sub">Sin productos cargados</span>
+        </button>
+        <button class="action-card" data-nav="products">
+          <span class="action-card__icon" aria-hidden="true">📱</span>
+          <span class="action-card__label">Productos</span>
+          <span class="action-card__sub" id="home-products-sub">0 productos</span>
+        </button>
+      </div>
+
+      <div class="home-stats">
+        <div class="home-stat">
+          <span class="home-stat__label">Dólar</span>
+          <span class="home-stat__value" id="home-dollar-value">—</span>
+        </div>
+        <div class="home-stat">
+          <span class="home-stat__label">TEM financiación propia</span>
+          <span class="home-stat__value" id="home-tem-value">—</span>
+        </div>
+        <div class="home-stat">
+          <span class="home-stat__label">Tarjeta 6 / 12 cuotas</span>
+          <span class="home-stat__value" id="home-card-value">—</span>
+        </div>
+      </div>
+
+      <button class="link-btn" data-nav="settings">Ajustes y administración →</button>
+    </section>
+
+    <!-- ---------- PRODUCTOS ---------- -->
+    <section id="view-products" class="view">
+      <div class="view-header">
+        <h2>Productos</h2>
+        <button id="btn-new-product" class="btn-icon" type="button" aria-label="Agregar producto">＋</button>
+      </div>
+
+      <div class="search-bar">
+        <input id="product-search" type="search" placeholder="Buscar producto…" autocomplete="off" />
+      </div>
+
+      <ul id="product-list" class="product-list"></ul>
+      <p id="product-empty" class="empty-state" hidden>Todavía no cargaste productos.<br />Tocá “＋” para agregar el primero.</p>
+    </section>
+
+    <!-- ---------- COTIZAR ---------- -->
+    <section id="view-quote" class="view">
+      <div class="view-header">
+        <h2>Cotizar</h2>
+        <button id="btn-clear-quote" class="link-btn link-btn--small" type="button">Vaciar</button>
+      </div>
+
+      <div class="search-bar">
+        <input id="quote-add-search" type="search" placeholder="Agregar producto a la cotización…" autocomplete="off" />
+      </div>
+      <ul id="quote-add-results" class="quote-add-results"></ul>
+
+      <div class="quote-config" id="quote-config" hidden>
+        <div class="field-row">
+          <label for="quote-dollar-rate">Dólar de esta cotización</label>
+          <div class="field-with-suffix field-with-suffix--prefix">
+            <span>$</span>
+            <input type="number" id="quote-dollar-rate" min="0" step="1" inputmode="decimal" />
+          </div>
+        </div>
+
+        <details class="rates-details">
+          <summary>Tasas de financiación de esta cotización</summary>
+
+          <div class="fin-block fin-block--own fin-block--rates">
+            <p class="fin-block__title">Financiación propia</p>
+            <div class="field-row">
+              <label for="own-tem">TEM</label>
+              <div class="field-with-suffix">
+                <input type="number" id="own-tem" min="0" step="0.01" inputmode="decimal" />
+                <span>%</span>
+              </div>
+            </div>
+            <div class="saved-rates" id="own-saved-rates"></div>
+          </div>
+
+          <div class="fin-block fin-block--card fin-block--rates">
+            <p class="fin-block__title">Financiación con tarjeta</p>
+            <div class="field-row">
+              <label for="card-rate6">Tasa 6 cuotas</label>
+              <div class="field-with-suffix">
+                <input type="number" id="card-rate6" min="0" step="0.01" inputmode="decimal" />
+                <span>%</span>
+              </div>
+            </div>
+            <div class="field-row">
+              <label for="card-rate12">Tasa 12 cuotas</label>
+              <div class="field-with-suffix">
+                <input type="number" id="card-rate12" min="0" step="0.01" inputmode="decimal" />
+                <span>%</span>
+              </div>
+            </div>
+            <div class="saved-rates" id="card-saved-rates"></div>
+          </div>
+        </details>
+      </div>
+
+      <div id="quote-items-wrap">
+        <ul id="quote-items" class="quote-items"></ul>
+        <p id="quote-empty" class="empty-state">Buscá un producto arriba para empezar la cotización.</p>
+      </div>
+
+      <button id="btn-generate-quote" class="btn-primary" type="button" hidden>Generar cotización</button>
+
+      <div id="quote-preview" class="quote-preview" hidden>
+        <div class="quote-preview__header">
+          <h3>Cotización lista</h3>
+        </div>
+        <pre id="quote-preview-text" class="quote-preview__text"></pre>
+        <button id="btn-copy-quote" class="btn-primary" type="button">📋 Copiar cotización</button>
+        <button id="btn-new-quote" class="link-btn" type="button">Empezar una cotización nueva</button>
+      </div>
+    </section>
+
+    <!-- ---------- AJUSTES ---------- -->
+    <section id="view-settings" class="view">
+      <div class="view-header">
+        <h2>Ajustes</h2>
+      </div>
+
+      <div class="settings-group">
+        <h3>Negocio</h3>
+        <div class="field-row">
+          <label for="business-name-input">Nombre</label>
+          <input type="text" id="business-name-input" />
+        </div>
+      </div>
+
+      <div class="settings-group settings-group--own">
+        <h3>Financiación propia</h3>
+        <div class="field-row">
+          <label for="settings-own-tem">TEM predeterminada</label>
+          <div class="field-with-suffix">
+            <input type="number" id="settings-own-tem" min="0" step="0.01" inputmode="decimal" />
+            <span>%</span>
+          </div>
+        </div>
+
+        <p class="settings-subtitle">Cuotas ofrecidas por defecto</p>
+        <div class="installments-picker" id="settings-own-installments"></div>
+
+        <p class="settings-subtitle">Tasas guardadas</p>
+        <div class="saved-rates-manage" id="settings-own-saved"></div>
+        <button class="btn-secondary" id="btn-add-own-rate" type="button">+ Guardar tasa actual</button>
+      </div>
+
+      <div class="settings-group settings-group--dollar">
+        <h3>Dólar</h3>
+        <div class="field-row">
+          <label for="settings-dollar-rate">Cotización predeterminada</label>
+          <div class="field-with-suffix field-with-suffix--prefix">
+            <span>$</span>
+            <input type="number" id="settings-dollar-rate" min="0" step="1" inputmode="decimal" />
+          </div>
+        </div>
+        <p class="settings-hint">Se precarga en cada cotización nueva; podés ajustarla ahí sin afectar este valor predeterminado.</p>
+      </div>
+
+      <div class="settings-group settings-group--card">
+        <h3>Financiación con tarjeta</h3>
+        <div class="field-row">
+          <label for="settings-card-rate6">Tasa 6 cuotas</label>
+          <div class="field-with-suffix">
+            <input type="number" id="settings-card-rate6" min="0" step="0.01" inputmode="decimal" />
+            <span>%</span>
+          </div>
+        </div>
+        <div class="field-row">
+          <label for="settings-card-rate12">Tasa 12 cuotas</label>
+          <div class="field-with-suffix">
+            <input type="number" id="settings-card-rate12" min="0" step="0.01" inputmode="decimal" />
+            <span>%</span>
+          </div>
+        </div>
+
+        <p class="settings-subtitle">Cuotas ofrecidas por defecto</p>
+        <div class="installments-picker" id="settings-card-installments"></div>
+
+        <p class="settings-subtitle">Configuraciones guardadas</p>
+        <div class="saved-rates-manage" id="settings-card-saved"></div>
+        <button class="btn-secondary" id="btn-add-card-config" type="button">+ Guardar configuración actual</button>
+      </div>
+
+      <div class="settings-group">
+        <h3>Copia de seguridad</h3>
+        <p class="settings-hint">Los datos se guardan solo en este iPhone. Exportá antes de cambiar de equipo o borrar Safari.</p>
+        <button class="btn-secondary" id="btn-export" type="button">⬇️ Exportar datos</button>
+        <label class="btn-secondary btn-secondary--file">
+          ⬆️ Importar datos
+          <input type="file" id="input-import" accept="application/json" hidden />
+        </label>
+      </div>
+
+      <p class="app-version">iPoint Carcarañá · Cotizador v1.0</p>
+    </section>
+
+  </main>
+
+  <!-- ===================== NAV INFERIOR ===================== -->
+  <nav class="bottom-nav">
+    <button class="nav-btn" data-nav="home" aria-label="Inicio">
+      <span class="nav-btn__icon">🏠</span><span>Inicio</span>
+    </button>
+    <button class="nav-btn" data-nav="products" aria-label="Productos">
+      <span class="nav-btn__icon">📱</span><span>Productos</span>
+    </button>
+    <button class="nav-btn" data-nav="quote" aria-label="Cotizar">
+      <span class="nav-btn__icon">🧮</span><span>Cotizar</span>
+    </button>
+    <button class="nav-btn" data-nav="settings" aria-label="Ajustes">
+      <span class="nav-btn__icon">⚙️</span><span>Ajustes</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- ===================== MODAL PRODUCTO ===================== -->
+<div id="product-modal" class="modal" hidden>
+  <div class="modal__backdrop" id="product-modal-backdrop"></div>
+  <div class="modal__sheet">
+    <div class="modal__handle"></div>
+    <h3 id="product-modal-title">Nuevo producto</h3>
+
+    <form id="product-form">
+      <input type="hidden" id="pf-id" />
+      <div class="field-row">
+        <label for="pf-name">Nombre *</label>
+        <input type="text" id="pf-name" required placeholder="iPhone 17" />
+      </div>
+      <div class="field-row">
+        <label for="pf-variant">Variante</label>
+        <input type="text" id="pf-variant" placeholder="256 GB" />
+      </div>
+      <div class="field-row">
+        <label for="pf-cost-usd">Costo (USD) *</label>
+        <div class="field-with-suffix field-with-suffix--prefix">
+          <span>US$</span>
+          <input type="number" id="pf-cost-usd" min="0" step="1" inputmode="decimal" required />
+        </div>
+      </div>
+      <div class="field-row">
+        <label for="pf-markup-usd">Recargo (USD) *</label>
+        <div class="field-with-suffix field-with-suffix--prefix">
+          <span>US$</span>
+          <input type="number" id="pf-markup-usd" min="0" step="1" inputmode="decimal" required />
+        </div>
+      </div>
+      <div class="computed-line" id="pf-contado-preview">Contado: US$ 0</div>
+      <label class="toggle-row">
+        <span>Producto activo</span>
+        <input type="checkbox" id="pf-active" checked />
+      </label>
+
+      <div class="modal__actions">
+        <button type="button" id="btn-delete-product" class="btn-danger" hidden>Eliminar</button>
+        <button type="button" id="btn-cancel-product" class="btn-secondary">Cancelar</button>
+        <button type="submit" class="btn-primary">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL PROMPT (nombre para guardar tasa) ===================== -->
+<div id="prompt-modal" class="modal" hidden>
+  <div class="modal__backdrop" id="prompt-modal-backdrop"></div>
+  <div class="modal__sheet modal__sheet--small">
+    <div class="modal__handle"></div>
+    <h3 id="prompt-modal-title">Guardar</h3>
+    <div class="field-row">
+      <label for="prompt-input">Nombre</label>
+      <input type="text" id="prompt-input" placeholder="Ej: Cliente especial" />
+    </div>
+    <div class="modal__actions">
+      <button type="button" id="prompt-cancel" class="btn-secondary">Cancelar</button>
+      <button type="button" id="prompt-ok" class="btn-primary">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
